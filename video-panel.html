@@ -3,77 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Auto Caption Panel</title>
+<title>Video Line Caption</title>
 
 <style>
-body {
-    margin: 0;
-    background: black;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 15px;
+body{
+    margin:0;
+    background:black;
+    color:white;
+    font-family:Arial, sans-serif;
+    text-align:center;
+    padding:15px;
 }
 
-h2 {
-    margin-bottom: 10px;
+h2{
+    margin-bottom:10px;
 }
 
-input, button {
-    width: 90%;
-    max-width: 400px;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
+input, textarea, button{
+    width:90%;
+    max-width:400px;
+    margin-top:10px;
+    padding:10px;
+    font-size:16px;
+    border-radius:8px;
+    border:none;
 }
 
-button {
-    background: #ff0055;
-    color: white;
-    font-weight: bold;
+button{
+    background:#ff0055;
+    color:white;
+    font-weight:bold;
 }
 
-#videoPlayer {
-    width: 100%;
-    max-height: 60vh;
-    margin-top: 15px;
-    border-radius: 10px;
-    background: black;
+#videoPlayer{
+    width:100%;
+    max-height:60vh;
+    margin-top:15px;
+    border-radius:10px;
 }
 
-#liveCaption {
-    margin-top: 20px;
-    font-size: 22px;
-    font-weight: bold;
-    min-height: 60px;
-    word-wrap: break-word;
+#captionBox{
+    margin-top:20px;
+    font-size:26px;
+    font-weight:bold;
+    min-height:70px;
+    line-height:36px;
+    transition:0.3s ease;
+}
+
+.line{
+    animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
 
 <body>
 
-<h2>Video Auto Caption Panel</h2>
+<h2>Video Line-by-Line Caption</h2>
 
-<!-- Video Upload -->
 <input type="file" id="videoInput" accept="video/*">
 
-<!-- Video Player -->
+<textarea id="scriptInput" rows="5" placeholder="हर लाइन अलग लिखें..."></textarea>
+
+<button id="prepareBtn">कैप्शन तैयार करें</button>
+
 <video id="videoPlayer" controls></video>
 
-<!-- Buttons -->
-<button onclick="startRecognition()">कैप्शन शुरू करें</button>
-<button onclick="stopRecognition()">कैप्शन रोकें</button>
-<button onclick="goBack()">वापस जाएँ</button>
+<div id="captionBox"></div>
 
-<!-- Live Caption -->
-<div id="liveCaption"></div>
+<script>
+const videoInput = document.getElementById("videoInput");
+const videoPlayer = document.getElementById("videoPlayer");
+const scriptInput = document.getElementById("scriptInput");
+const captionBox = document.getElementById("captionBox");
+const prepareBtn = document.getElementById("prepareBtn");
 
-<!-- Video Logic JS -->
-<script src="video.js"></script>
-  
+let lines = [];
+let videoDuration = 0;
+
+function randomColor(){
+    return "hsl(" + Math.floor(Math.random()*360) + ", 100%, 60%)";
+}
+
+// Upload video
+videoInput.addEventListener("change", function(){
+    const file = this.files[0];
+    if(file){
+        videoPlayer.src = URL.createObjectURL(file);
+        captionBox.innerHTML = "";
+        scriptInput.value = "";
+        lines = [];
+    }
+});
+
+// Get video duration
+videoPlayer.addEventListener("loadedmetadata", function(){
+    videoDuration = videoPlayer.duration;
+});
+
+// Prepare lines
+prepareBtn.addEventListener("click", function(){
+
+    if(!videoPlayer.src){
+        alert("पहले वीडियो चुनें");
+        return;
+    }
+
+    if(!scriptInput.value.trim()){
+        alert("पहले टेक्स्ट लिखें");
+        return;
+    }
+
+    if(videoDuration === 0){
+        alert("वीडियो अभी पूरी तरह लोड नहीं हुआ");
+        return;
+    }
+
+    lines = scriptInput.value.trim().split("\n");
+});
+
+// Sync lines with video
+videoPlayer.addEventListener("timeupdate", function(){
+
+    if(lines.length === 0) return;
+
+    const currentTime = videoPlayer.currentTime;
+    const interval = videoDuration / lines.length;
+    const activeIndex = Math.floor(currentTime / interval);
+
+    if(activeIndex < lines.length){
+
+        // Multi-color words
+        const words = lines[activeIndex].split(" ");
+        captionBox.innerHTML = "";
+
+        words.forEach(word=>{
+            const span = document.createElement("span");
+            span.textContent = word + " ";
+            span.style.color = randomColor();
+            captionBox.appendChild(span);
+        });
+
+        captionBox.className = "line";
+    }
+
+});
+</script>
 
 </body>
 </html>
