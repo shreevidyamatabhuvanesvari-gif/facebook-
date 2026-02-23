@@ -104,6 +104,73 @@ function speak(text) {
         }
     };
 
+    const videoPanel = document.getElementById("videoPanel");
+const controls = document.getElementById("controls"); // आपका image panel
+
+function goToVideoPanel() {
+    controls.style.display = "none";
+    videoPanel.style.display = "block";
+}
+
+function backToImagePanel() {
+    videoPanel.style.display = "none";
+    controls.style.display = "block";
+}
+
+// Video Upload
+const videoInput = document.getElementById("videoInput");
+const videoPlayer = document.getElementById("videoPlayer");
+const liveCaption = document.getElementById("liveCaption");
+
+videoInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+        videoPlayer.src = URL.createObjectURL(file);
+    }
+});
+
+// Multi Color
+function multiColorText(text) {
+    const colors = ["red", "cyan", "yellow", "lime", "orange"];
+    const words = text.split(" ");
+    let result = "";
+
+    words.forEach((word, i) => {
+        const color = colors[i % colors.length];
+        result += `<span style="color:${color}">${word} </span>`;
+    });
+
+    return result;
+}
+
+// Speech Recognition
+let recognition;
+
+function startRecognition() {
+
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("Speech recognition supported नहीं है");
+        return;
+    }
+
+    recognition = new webkitSpeechRecognition();
+    recognition.lang = "hi-IN";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function (event) {
+        let transcript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+        }
+
+        liveCaption.innerHTML = multiColorText(transcript);
+    };
+
+    recognition.start();
+}
+
     window.speechSynthesis.speak(speech);
 }
 
