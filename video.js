@@ -7,81 +7,97 @@ const liveCaption = document.getElementById("liveCaption");
 const videoContainer = document.getElementById("videoContainer");
 
 // 🎬 Upload Video
-videoInput.addEventListener("change", function(){
+videoInput.addEventListener("change", function () {
     const file = this.files[0];
-    if(file){
+    if (file) {
         videoPlayer.src = URL.createObjectURL(file);
+        videoPlayer.load();
         liveCaption.innerHTML = "";
     }
 });
 
-// 🎨 Random Color
-function randomColor(){
-    return "hsl(" + Math.floor(Math.random()*360) + ",100%,60%)";
+// 🎨 Random Color Generator
+function randomColor() {
+    return `hsl(${Math.floor(Math.random() * 360)}, 100%, 60%)`;
 }
 
-// 🎨 Multi Color
-function multiColor(text){
-    const words = text.trim().split(" ");
-    let result = "";
-    words.forEach(word=>{
-        result += `<span style="color:${randomColor()}">${word} </span>`;
-    });
-    return result;
+// 🎨 Multi Color Caption
+function multiColor(text) {
+    return text
+        .trim()
+        .split(" ")
+        .map(word => `<span style="color:${randomColor()}">${word}</span>`)
+        .join(" ");
 }
 
 // 🎤 Start Recognition
-function startRecognition(){
+function startRecognition() {
 
-    if(!('webkitSpeechRecognition' in window)){
-        alert("Speech Recognition support नहीं है");
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("आपका ब्राउज़र Speech Recognition सपोर्ट नहीं करता। कृपया Chrome का उपयोग करें।");
         return;
     }
 
-    if(isRunning) return;
+    if (isRunning) return;
 
-    recognition = new webkitSpeechRecognition();
+    recognition = new SpeechRecognition();
+
     recognition.lang = "hi-IN";
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
 
-    recognition.onresult = function(event){
-        let text = event.results[event.results.length-1][0].transcript;
-        if(text.trim() !== ""){
-            liveCaption.innerHTML = multiColor(text);
+    recognition.onresult = function (event) {
+
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript + " ";
+            }
+        }
+
+        if (finalTranscript.trim() !== "") {
+            liveCaption.innerHTML = multiColor(finalTranscript);
         }
     };
 
-    recognition.onerror = function(e){
-        console.log("Speech error:", e.error);
+    recognition.onerror = function (event) {
+        console.error("Speech Recognition Error:", event.error);
     };
 
-    recognition.onend = function(){
-        isRunning = false;
+    recognition.onend = function () {
+        if (isRunning) {
+            recognition.start(); // auto restart
+        }
     };
 
     recognition.start();
     isRunning = true;
+
+    // 🎬 वीडियो भी साथ में चलाएं
+    videoPlayer.play();
 }
 
 // 🛑 Stop Recognition
-function stopRecognition(){
-    if(recognition && isRunning){
-        recognition.stop();
+function stopRecognition() {
+    if (recognition) {
         isRunning = false;
+        recognition.stop();
     }
 }
 
-// 🔳 Fullscreen Container
-function goFullScreen(){
-    if(videoContainer.requestFullscreen){
+// 🔳 Fullscreen
+function goFullScreen() {
+    if (videoContainer.requestFullscreen) {
         videoContainer.requestFullscreen();
-    }else if(videoContainer.webkitRequestFullscreen){
+    } else if (videoContainer.webkitRequestFullscreen) {
         videoContainer.webkitRequestFullscreen();
     }
 }
 
 // 🔙 Back
-function goBack(){
+function goBack() {
     window.location.href = "index.html";
 }
