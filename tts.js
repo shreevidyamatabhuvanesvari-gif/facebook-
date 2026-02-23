@@ -2,80 +2,80 @@ const imageInput = document.getElementById("imageInput");
 const userText = document.getElementById("userText");
 const controls = document.getElementById("controls");
 const reelView = document.getElementById("reelView");
-const imageContainer = document.getElementById("imageContainer");
+const reelImage = document.getElementById("reelImage");
 const reelText = document.getElementById("reelText");
+const slideCount = document.getElementById("slideCount");
 
-let images = [];
+let slides = [];
+let selectedImage = null;
 
-// 📷 Multiple Image Upload
+// Image select
 imageInput.addEventListener("change", function () {
-    images = [];
-    imageContainer.innerHTML = "";
-
-    Array.from(this.files).forEach((file, index) => {
+    const file = this.files[0];
+    if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.classList.add("reelImage");
-            if (index === 0) img.classList.add("active");
-            imageContainer.appendChild(img);
-            images.push(img);
+            selectedImage = e.target.result;
         };
         reader.readAsDataURL(file);
-    });
+    }
 });
 
-// 🎨 Dummy Apply (optional)
-function applyText() {
-    alert("Reel preview 'बोलो' में दिखेगा");
-}
-
-// 🎬 Start Reel Mode
-function startReel() {
+// Add Slide (One by One)
+function addSlide() {
 
     const text = userText.value.trim();
-    if (text === "" || images.length === 0) {
-        alert("फोटो और टेक्स्ट दोनों जरूरी हैं");
+
+    if (!selectedImage || text === "") {
+        alert("फोटो और लेख दोनों जरूरी हैं");
+        return;
+    }
+
+    slides.push({
+        image: selectedImage,
+        text: text
+    });
+
+    userText.value = "";
+    imageInput.value = "";
+    selectedImage = null;
+
+    slideCount.innerText = `कुल स्लाइड: ${slides.length}`;
+}
+
+// Start Reel Mode
+function startReel() {
+
+    if (slides.length === 0) {
+        alert("पहले फोटो जोड़ें");
         return;
     }
 
     controls.style.display = "none";
-    reelView.style.display = "block";
+    reelView.style.display = "flex";
 
-    const lines = text.split("\n");
-    let currentLine = 0;
-    let currentImage = 0;
-
-    showLine(lines[currentLine]);
+    let index = 0;
+    showSlide(index);
 
     const interval = setInterval(() => {
-        currentLine++;
-        currentImage++;
-
-        if (currentLine >= lines.length) {
+        index++;
+        if (index >= slides.length) {
             clearInterval(interval);
             return;
         }
-
-        switchImage(currentImage);
-        showLine(lines[currentLine]);
-
-    }, 3000);
+        showSlide(index);
+    }, 4000);
 }
 
-// 🔄 Image Switch Animation
-function switchImage(index) {
-    images.forEach(img => img.classList.remove("active"));
-    if (images[index % images.length]) {
-        images[index % images.length].classList.add("active");
-    }
-}
+// Show Slide
+function showSlide(index) {
 
-// 📝 Show One Line with Multi Color
-function showLine(text) {
+    const slide = slides[index];
+
+    reelImage.src = slide.image;
+
     const colors = ["red", "cyan", "yellow", "lime", "orange"];
-    const words = text.split(" ");
+    const words = slide.text.split(" ");
     let colored = "";
 
     words.forEach((word, i) => {
@@ -85,11 +85,12 @@ function showLine(text) {
 
     reelText.innerHTML = colored;
 
-    speak(text);
+    speak(slide.text);
 }
 
-// 🔊 Female Voice
+// Female Voice
 function speak(text) {
+
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "hi-IN";
     speech.pitch = 1.1;
