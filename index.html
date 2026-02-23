@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reel Slide App</title>
+<title>Reel App</title>
 
 <style>
 body {
@@ -14,7 +14,7 @@ body {
     text-align: center;
 }
 
-#controls {
+.panel {
     padding: 15px;
 }
 
@@ -28,84 +28,57 @@ input, textarea, button {
     border: none;
 }
 
-textarea {
-    height: 70px;
-    resize: none;
-}
-
 button {
     background: #ff0055;
     color: white;
     font-weight: bold;
 }
 
-/* Reel View */
-#reelView {
+/* Video Panel */
+#videoPanel {
     display: none;
-    height: 100vh;
-    width: 100%;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 
-#reelImage {
+video {
     width: 100%;
-    max-height: 70vh;
-    object-fit: cover;
-    animation: fadeIn 1s ease;
+    max-height: 60vh;
+    margin-top: 10px;
 }
 
-#reelText {
+#liveCaption {
     margin-top: 15px;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
-    padding: 10px;
     min-height: 60px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(1.1); }
-    to { opacity: 1; transform: scale(1); }
 }
 </style>
 </head>
 
 <body>
 
-<div id="controls">
+<!-- INDEX PANEL -->
+<div id="indexPanel" class="panel">
 
-    <h3>Image + Multi Color Voice</h3>
-
-    <input type="file" id="imageInput" accept="image/*">
-    <textarea id="userText" placeholder="इस फोटो से संबंधित लेख लिखें..."></textarea>
-
-    <button onclick="addSlide()">फोटो जोड़ें</button>
-    <button onclick="startReel()">बोलो</button>
-    <button onclick="goToVideoPanel()">वीडियो क्लिप पैनल</button>
-
-    <div id="slideCount"></div>
+    <h3>Image + Voice Panel</h3>
+    <button onclick="goToVideo()">वीडियो क्लिप पैनल पर जाएँ</button>
 
 </div>
 
-<div id="reelView">
-    <img id="reelImage">
-    <div id="reelText"></div>
-</div>
-    <div id="videoPanel" style="display:none; padding:15px; background:black;">
+<!-- VIDEO PANEL -->
+<div id="videoPanel" class="panel">
 
     <h3>Video Auto Caption</h3>
 
     <input type="file" id="videoInput" accept="video/*">
 
-    <video id="videoPlayer" controls style="width:100%; max-height:60vh;"></video>
+    <video id="videoPlayer" controls></video>
 
     <button onclick="startRecognition()">कैप्शन शुरू करें</button>
-    <button onclick="backToImagePanel()">वापस जाएँ</button>
+    <button onclick="backToIndex()">वापस जाएँ</button>
 
-    <div id="liveCaption" style="margin-top:15px; font-size:22px; font-weight:bold;"></div>
+    <div id="liveCaption"></div>
 
-    </div>
+</div>
 
 <script src="tts.js"></script>
 
