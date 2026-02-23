@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Reel Caption App</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        #previewImage {
+            max-width: 300px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        #caption {
+            font-size: 28px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .red { color: red; }
+        .blue { color: cyan; }
+        .yellow { color: yellow; }
+    </style>
+</head>
+<body>
+
+    <h2>Image + Multi Color Voice App</h2>
+
+    <input type="file" id="imageInput" accept="image/*">
+
+    <br>
+    <img id="previewImage" />
+
+    <div id="caption">
+        <span class="red">नमस्ते </span>
+        <span class="blue">दोस्तों </span>
+        <span class="yellow">स्वागत है!</span>
+    </div>
+
+    <br>
+    <button onclick="speakText()">बोलो</button>
+
+    <script src="tts.js"></script>
+
+</body>
+</html>
