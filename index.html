@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reel Image Voice App</title>
+<title>Reel Style App</title>
 
 <style>
 body {
     margin: 0;
-    padding: 15px;
-    background: #111;
+    background: black;
     color: white;
     font-family: Arial, sans-serif;
     text-align: center;
 }
 
-h2 {
-    margin-bottom: 15px;
+/* Control Panel */
+#controls {
+    padding: 15px;
 }
 
 input, textarea, button {
@@ -29,46 +29,63 @@ input, textarea, button {
     border: none;
 }
 
-textarea {
-    height: 80px;
-    resize: none;
-}
-
 button {
     background: #ff0055;
     color: white;
     font-weight: bold;
 }
 
-#previewImage {
-    margin-top: 15px;
-    max-width: 100%;
-    border-radius: 10px;
+/* Reel View */
+#reelView {
+    display: none;
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
 }
 
-#caption {
-    margin-top: 15px;
-    font-size: 24px;
+.reelImage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.2);
+    transition: all 1s ease;
+}
+
+.reelImage.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+#reelText {
+    position: absolute;
+    bottom: 20%;
+    width: 100%;
+    font-size: 28px;
     font-weight: bold;
-    word-wrap: break-word;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Image + Multi Color Voice</h2>
+<div id="controls">
+    <h3>Image + Multi Color Voice</h3>
 
-<input type="file" id="imageInput" accept="image/*">
+    <input type="file" id="imageInput" accept="image/*" multiple>
 
-<img id="previewImage">
+    <textarea id="userText" placeholder="हर लाइन अलग अलग लिखें..."></textarea>
 
-<textarea id="userText" placeholder="यहाँ अपना टेक्स्ट लिखें..."></textarea>
+    <button onclick="applyText()">टेक्स्ट दिखाओ</button>
+    <button onclick="startReel()">बोलो</button>
+</div>
 
-<button onclick="applyText()">टेक्स्ट दिखाओ</button>
-<button onclick="speakText()">बोलो</button>
-
-<div id="caption"></div>
+<div id="reelView">
+    <div id="imageContainer"></div>
+    <div id="reelText"></div>
+</div>
 
 <script src="tts.js"></script>
 
