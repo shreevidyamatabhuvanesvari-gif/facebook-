@@ -1,52 +1,76 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <title>Reel Caption App</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reel Image Voice App</title>
 
-        #previewImage {
-            max-width: 300px;
-            margin-top: 20px;
-            border-radius: 10px;
-        }
+<style>
+body {
+    margin: 0;
+    padding: 15px;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
 
-        #caption {
-            font-size: 28px;
-            margin-top: 15px;
-            font-weight: bold;
-        }
+h2 {
+    margin-bottom: 15px;
+}
 
-        .red { color: red; }
-        .blue { color: cyan; }
-        .yellow { color: yellow; }
-    </style>
+input, textarea, button {
+    width: 90%;
+    max-width: 400px;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+button {
+    background: #ff0055;
+    color: white;
+    font-weight: bold;
+}
+
+#previewImage {
+    margin-top: 15px;
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+#caption {
+    margin-top: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    word-wrap: break-word;
+}
+</style>
 </head>
+
 <body>
 
-    <h2>Image + Multi Color Voice App</h2>
+<h2>Image + Multi Color Voice</h2>
 
-    <input type="file" id="imageInput" accept="image/*">
+<input type="file" id="imageInput" accept="image/*">
 
-    <br>
-    <img id="previewImage" />
+<img id="previewImage">
 
-    <div id="caption">
-        <span class="red">नमस्ते </span>
-        <span class="blue">दोस्तों </span>
-        <span class="yellow">स्वागत है!</span>
-    </div>
+<textarea id="userText" placeholder="यहाँ अपना टेक्स्ट लिखें..."></textarea>
 
-    <br>
-    <button onclick="speakText()">बोलो</button>
+<button onclick="applyText()">टेक्स्ट दिखाओ</button>
+<button onclick="speakText()">बोलो</button>
 
-    <script src="tts.js"></script>
+<div id="caption"></div>
+
+<script src="tts.js"></script>
 
 </body>
 </html>
