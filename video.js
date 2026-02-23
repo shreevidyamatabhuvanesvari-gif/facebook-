@@ -1,7 +1,3 @@
-// =======================
-// Video + Live Caption
-// =======================
-
 let recognition = null;
 let isRunning = false;
 
@@ -12,9 +8,7 @@ const videoContainer = document.getElementById("videoContainer");
 
 // 🎬 Upload Video
 videoInput.addEventListener("change", function(){
-
     const file = this.files[0];
-
     if(file){
         videoPlayer.src = URL.createObjectURL(file);
         liveCaption.innerHTML = "";
@@ -26,16 +20,13 @@ function randomColor(){
     return "hsl(" + Math.floor(Math.random()*360) + ",100%,60%)";
 }
 
-// 🎨 Multi Color Line
+// 🎨 Multi Color
 function multiColor(text){
-
     const words = text.trim().split(" ");
     let result = "";
-
     words.forEach(word=>{
         result += `<span style="color:${randomColor()}">${word} </span>`;
     });
-
     return result;
 }
 
@@ -55,18 +46,18 @@ function startRecognition(){
     recognition.interimResults = false;
 
     recognition.onresult = function(event){
-
         let text = event.results[event.results.length-1][0].transcript;
-
         if(text.trim() !== ""){
             liveCaption.innerHTML = multiColor(text);
         }
     };
 
+    recognition.onerror = function(e){
+        console.log("Speech error:", e.error);
+    };
+
     recognition.onend = function(){
-        if(!videoPlayer.paused){
-            recognition.start();
-        }
+        isRunning = false;
     };
 
     recognition.start();
@@ -75,26 +66,14 @@ function startRecognition(){
 
 // 🛑 Stop Recognition
 function stopRecognition(){
-
-    if(recognition){
+    if(recognition && isRunning){
         recognition.stop();
         isRunning = false;
     }
 }
 
-// ▶ Video Play = Start
-videoPlayer.addEventListener("play", function(){
-    startRecognition();
-});
-
-// ⏸ Video Pause = Stop
-videoPlayer.addEventListener("pause", function(){
-    stopRecognition();
-});
-
-// 🔳 Custom Fullscreen (Container)
+// 🔳 Fullscreen Container
 function goFullScreen(){
-
     if(videoContainer.requestFullscreen){
         videoContainer.requestFullscreen();
     }else if(videoContainer.webkitRequestFullscreen){
