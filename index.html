@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reel App</title>
+<title>Reel Slide App</title>
 
 <style>
 body {
@@ -14,7 +14,7 @@ body {
     text-align: center;
 }
 
-.panel {
+#controls {
     padding: 15px;
 }
 
@@ -28,56 +28,68 @@ input, textarea, button {
     border: none;
 }
 
+textarea {
+    height: 70px;
+    resize: none;
+}
+
 button {
     background: #ff0055;
     color: white;
     font-weight: bold;
 }
 
-/* Video Panel */
-#videoPanel {
+/* Reel View */
+#reelView {
     display: none;
-}
-
-video {
+    height: 100vh;
     width: 100%;
-    max-height: 60vh;
-    margin-top: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-#liveCaption {
+#reelImage {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: cover;
+    animation: fadeIn 1s ease;
+}
+
+#reelText {
     margin-top: 15px;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
+    padding: 10px;
     min-height: 60px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(1.1); }
+    to { opacity: 1; transform: scale(1); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- INDEX PANEL -->
-<div id="indexPanel" class="panel">
+<div id="controls">
 
-    <h3>Image + Voice Panel</h3>
-    <button onclick="goToVideo()">वीडियो क्लिप पैनल पर जाएँ</button>
+    <h3>Image + Multi Color Voice</h3>
+
+    <input type="file" id="imageInput" accept="image/*">
+    <textarea id="userText" placeholder="इस फोटो से संबंधित लेख लिखें..."></textarea>
+
+    <button onclick="addSlide()">फोटो जोड़ें</button>
+    <button onclick="startReel()">बोलो</button>
+
+    <div id="slideCount"></div>
 
 </div>
 
-<!-- VIDEO PANEL -->
-<div id="videoPanel" class="panel">
-
-    <h3>Video Auto Caption</h3>
-
-    <input type="file" id="videoInput" accept="video/*">
-
-    <video id="videoPlayer" controls></video>
-
-    <button onclick="startRecognition()">कैप्शन शुरू करें</button>
-    <button onclick="backToIndex()">वापस जाएँ</button>
-
-    <div id="liveCaption"></div>
-
+<div id="reelView">
+    <img id="reelImage">
+    <div id="reelText"></div>
 </div>
 
 <script src="tts.js"></script>
