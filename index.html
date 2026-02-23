@@ -82,6 +82,7 @@ button {
 
     <button onclick="addSlide()">फोटो जोड़ें</button>
     <button onclick="startReel()">बोलो</button>
+    <button onclick="goToVideoPanel()">वीडियो क्लिप पैनल</button>
 
     <div id="slideCount"></div>
 
@@ -91,6 +92,20 @@ button {
     <img id="reelImage">
     <div id="reelText"></div>
 </div>
+    <div id="videoPanel" style="display:none; padding:15px; background:black;">
+
+    <h3>Video Auto Caption</h3>
+
+    <input type="file" id="videoInput" accept="video/*">
+
+    <video id="videoPlayer" controls style="width:100%; max-height:60vh;"></video>
+
+    <button onclick="startRecognition()">कैप्शन शुरू करें</button>
+    <button onclick="backToImagePanel()">वापस जाएँ</button>
+
+    <div id="liveCaption" style="margin-top:15px; font-size:22px; font-weight:bold;"></div>
+
+    </div>
 
 <script src="tts.js"></script>
 
