@@ -1,10 +1,10 @@
 const imageInput = document.getElementById("imageInput");
 const previewImage = document.getElementById("previewImage");
+const captionDiv = document.getElementById("caption");
 const userText = document.getElementById("userText");
-const caption = document.getElementById("caption");
 
 
-// 📷 Image Preview
+// 📷 Image Upload
 imageInput.addEventListener("change", function () {
     const file = this.files[0];
     if (file) {
@@ -17,60 +17,66 @@ imageInput.addEventListener("change", function () {
 });
 
 
-// 🎨 Multi-Color Text Apply Function
+// 🎨 Multi-Color Text Show Function
 function applyText() {
     const text = userText.value.trim();
 
-    if (text === "") {
+    if (!text) {
         alert("पहले टेक्स्ट लिखें");
         return;
     }
 
-    const colors = ["red", "cyan", "yellow", "lime", "orange"];
     const words = text.split(" ");
+    const colors = ["red", "cyan", "yellow", "lime", "orange", "pink"];
 
-    let coloredText = "";
+    captionDiv.innerHTML = "";
 
     words.forEach((word, index) => {
-        const color = colors[index % colors.length];
-        coloredText += `<span style="color:${color}">${word} </span>`;
+        const span = document.createElement("span");
+        span.textContent = word + " ";
+        span.style.color = colors[index % colors.length];
+        captionDiv.appendChild(span);
     });
-
-    caption.innerHTML = coloredText;
 }
 
 
-// 🔊 Female Voice Speak Function
+// 🔊 Female Voice Speak
 function speakText() {
     const text = userText.value.trim();
 
-    if (text === "") {
+    if (!text) {
         alert("पहले टेक्स्ट लिखें");
         return;
     }
 
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "hi-IN";
-    speech.pitch = 1.2;
-    speech.rate = 1;
 
     const voices = window.speechSynthesis.getVoices();
 
-    // Female voice ढूँढना
-    const femaleVoice = voices.find(voice =>
-        voice.lang.includes("hi") &&
+    // Female Hindi voice खोजें
+    let femaleVoice = voices.find(voice =>
+        voice.lang === "hi-IN" &&
         voice.name.toLowerCase().includes("female")
     );
+
+    // अगर female नाम से न मिले तो कोई भी Hindi voice लें
+    if (!femaleVoice) {
+        femaleVoice = voices.find(voice => voice.lang === "hi-IN");
+    }
 
     if (femaleVoice) {
         speech.voice = femaleVoice;
     }
 
+    speech.pitch = 1.1;
+    speech.rate = 1;
+
     window.speechSynthesis.speak(speech);
 }
 
 
-// Voices load fix (mobile browser issue fix)
-window.speechSynthesis.onvoiceschanged = function () {
+// Voices load fix (Mobile Chrome के लिए जरूरी)
+window.speechSynthesis.onvoiceschanged = () => {
     window.speechSynthesis.getVoices();
 };
