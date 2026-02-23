@@ -8,6 +8,7 @@ const slideCount = document.getElementById("slideCount");
 
 let slides = [];
 let selectedImage = null;
+let currentIndex = 0;
 
 // Image select
 imageInput.addEventListener("change", function () {
@@ -21,7 +22,7 @@ imageInput.addEventListener("change", function () {
     }
 });
 
-// Add Slide (One by One)
+// Add Slide
 function addSlide() {
 
     const text = userText.value.trim();
@@ -43,7 +44,7 @@ function addSlide() {
     slideCount.innerText = `कुल स्लाइड: ${slides.length}`;
 }
 
-// Start Reel Mode
+// Start Reel
 function startReel() {
 
     if (slides.length === 0) {
@@ -54,24 +55,16 @@ function startReel() {
     controls.style.display = "none";
     reelView.style.display = "flex";
 
-    let index = 0;
-    showSlide(index);
-
-    const interval = setInterval(() => {
-        index++;
-        if (index >= slides.length) {
-            clearInterval(interval);
-            return;
-        }
-        showSlide(index);
-    }, 4000);
+    currentIndex = 0;
+    showSlide(currentIndex);
 }
 
 // Show Slide
 function showSlide(index) {
 
-    const slide = slides[index];
+    if (index >= slides.length) return;
 
+    const slide = slides[index];
     reelImage.src = slide.image;
 
     const colors = ["red", "cyan", "yellow", "lime", "orange"];
@@ -88,7 +81,7 @@ function showSlide(index) {
     speak(slide.text);
 }
 
-// Female Voice
+// Speak + Move Next After Finish
 function speak(text) {
 
     const speech = new SpeechSynthesisUtterance(text);
@@ -103,6 +96,13 @@ function speak(text) {
     );
 
     if (femaleVoice) speech.voice = femaleVoice;
+
+    speech.onend = function () {
+        currentIndex++;
+        if (currentIndex < slides.length) {
+            showSlide(currentIndex);
+        }
+    };
 
     window.speechSynthesis.speak(speech);
 }
