@@ -35,29 +35,42 @@ button{
     font-weight:bold;
 }
 
+/* Video Container */
+#videoContainer{
+    position:relative;
+    width:100%;
+    margin-top:15px;
+}
+
 #videoPlayer{
     width:100%;
-    max-height:60vh;
-    margin-top:15px;
+    max-height:65vh;
     border-radius:10px;
+    background:black;
 }
 
+/* Caption Style */
 #captionBox{
-    margin-top:20px;
-    font-size:26px;
+    position:absolute;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:28px;
     font-weight:bold;
-    min-height:70px;
+    text-align:center;
+    width:90%;
+    text-shadow:2px 2px 6px black;
     line-height:36px;
-    transition:0.3s ease;
 }
 
+/* Line Animation */
 .line{
-    animation:fadeIn 0.4s ease;
+    animation:fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn{
-    from{opacity:0; transform:translateY(10px);}
-    to{opacity:1; transform:translateY(0);}
+    from{opacity:0; transform:translate(-50%,10px);}
+    to{opacity:1; transform:translate(-50%,0);}
 }
 </style>
 </head>
@@ -71,10 +84,13 @@ button{
 <textarea id="scriptInput" rows="5" placeholder="हर लाइन अलग लिखें..."></textarea>
 
 <button id="prepareBtn">कैप्शन तैयार करें</button>
+<button onclick="goFullScreen()">फुल स्क्रीन</button>
+<button onclick="goBack()">वापस जाएँ</button>
 
-<video id="videoPlayer" controls></video>
-
-<div id="captionBox"></div>
+<div id="videoContainer">
+    <video id="videoPlayer" controls></video>
+    <div id="captionBox"></div>
+</div>
 
 <script>
 const videoInput = document.getElementById("videoInput");
@@ -86,11 +102,12 @@ const prepareBtn = document.getElementById("prepareBtn");
 let lines = [];
 let videoDuration = 0;
 
+// Random Color
 function randomColor(){
-    return "hsl(" + Math.floor(Math.random()*360) + ", 100%, 60%)";
+    return "hsl(" + Math.floor(Math.random()*360) + ",100%,60%)";
 }
 
-// Upload video
+// Upload Video
 videoInput.addEventListener("change", function(){
     const file = this.files[0];
     if(file){
@@ -101,12 +118,12 @@ videoInput.addEventListener("change", function(){
     }
 });
 
-// Get video duration
+// Get Duration Safely
 videoPlayer.addEventListener("loadedmetadata", function(){
     videoDuration = videoPlayer.duration;
 });
 
-// Prepare lines
+// Prepare Captions
 prepareBtn.addEventListener("click", function(){
 
     if(!videoPlayer.src){
@@ -127,7 +144,7 @@ prepareBtn.addEventListener("click", function(){
     lines = scriptInput.value.trim().split("\n");
 });
 
-// Sync lines with video
+// Sync Lines
 videoPlayer.addEventListener("timeupdate", function(){
 
     if(lines.length === 0) return;
@@ -136,9 +153,8 @@ videoPlayer.addEventListener("timeupdate", function(){
     const interval = videoDuration / lines.length;
     const activeIndex = Math.floor(currentTime / interval);
 
-    if(activeIndex < lines.length){
+    if(activeIndex >= 0 && activeIndex < lines.length){
 
-        // Multi-color words
         const words = lines[activeIndex].split(" ");
         captionBox.innerHTML = "";
 
@@ -153,6 +169,24 @@ videoPlayer.addEventListener("timeupdate", function(){
     }
 
 });
+
+// Fullscreen Container
+function goFullScreen(){
+    const container = document.getElementById("videoContainer");
+
+    if(container.requestFullscreen){
+        container.requestFullscreen();
+    } else if(container.webkitRequestFullscreen){
+        container.webkitRequestFullscreen();
+    } else if(container.msRequestFullscreen){
+        container.msRequestFullscreen();
+    }
+}
+
+// Back Button
+function goBack(){
+    window.location.href = "index.html";
+}
 </script>
 
 </body>
