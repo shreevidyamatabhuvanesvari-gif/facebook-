@@ -1,122 +1,108 @@
-// ===============================
-// 🎬 Video + Live Speech Caption
-// ===============================
+// =======================
+// Video + Live Caption
+// =======================
 
 let recognition = null;
-let isRecognizing = false;
+let isRunning = false;
 
 const videoInput = document.getElementById("videoInput");
 const videoPlayer = document.getElementById("videoPlayer");
 const liveCaption = document.getElementById("liveCaption");
+const videoContainer = document.getElementById("videoContainer");
 
-// 🎬 Video Upload
-videoInput.addEventListener("change", function () {
+// 🎬 Upload Video
+videoInput.addEventListener("change", function(){
 
     const file = this.files[0];
 
-    if (file) {
+    if(file){
         videoPlayer.src = URL.createObjectURL(file);
         liveCaption.innerHTML = "";
     }
 });
 
-// 🎨 Random Color Generator
-function randomColor() {
-    return "hsl(" + Math.floor(Math.random() * 360) + ", 100%, 60%)";
+// 🎨 Random Color
+function randomColor(){
+    return "hsl(" + Math.floor(Math.random()*360) + ",100%,60%)";
 }
 
-// 🎨 Multi-Color Line
-function multiColorLine(text) {
+// 🎨 Multi Color Line
+function multiColor(text){
 
     const words = text.trim().split(" ");
     let result = "";
 
-    words.forEach(word => {
+    words.forEach(word=>{
         result += `<span style="color:${randomColor()}">${word} </span>`;
     });
 
-    return `<div class="captionLine">${result}</div>`;
+    return result;
 }
 
 // 🎤 Start Recognition
-function startRecognition() {
+function startRecognition(){
 
-    if (!('webkitSpeechRecognition' in window)) {
-        alert("यह browser Speech Recognition support नहीं करता");
+    if(!('webkitSpeechRecognition' in window)){
+        alert("Speech Recognition support नहीं है");
         return;
     }
 
-    if (isRecognizing) return;
+    if(isRunning) return;
 
     recognition = new webkitSpeechRecognition();
     recognition.lang = "hi-IN";
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = false;
 
-    recognition.onresult = function (event) {
+    recognition.onresult = function(event){
 
-        let finalTranscript = "";
-        let interimTranscript = "";
+        let text = event.results[event.results.length-1][0].transcript;
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript;
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-            }
-        }
-
-        // 🎯 Final Line (एक-एक लाइन)
-        if (finalTranscript.trim() !== "") {
-            liveCaption.innerHTML = multiColorLine(finalTranscript);
-        }
-
-        // 📝 Interim (हल्का grey preview)
-        if (interimTranscript.trim() !== "") {
-            liveCaption.innerHTML =
-                multiColorLine(finalTranscript) +
-                `<div style="color:#aaa; font-size:20px;">${interimTranscript}</div>`;
+        if(text.trim() !== ""){
+            liveCaption.innerHTML = multiColor(text);
         }
     };
 
-    recognition.onerror = function (event) {
-        console.log("Speech Error:", event.error);
-    };
-
-    recognition.onend = function () {
-        isRecognizing = false;
-
-        // अगर वीडियो अभी भी चल रहा है तो auto restart
-        if (!videoPlayer.paused) {
-            startRecognition();
+    recognition.onend = function(){
+        if(!videoPlayer.paused){
+            recognition.start();
         }
     };
 
     recognition.start();
-    isRecognizing = true;
+    isRunning = true;
 }
 
 // 🛑 Stop Recognition
-function stopRecognition() {
+function stopRecognition(){
 
-    if (recognition && isRecognizing) {
+    if(recognition){
         recognition.stop();
-        isRecognizing = false;
+        isRunning = false;
     }
 }
 
-// ▶ Video Play → Auto Start Caption
-videoPlayer.addEventListener("play", function () {
+// ▶ Video Play = Start
+videoPlayer.addEventListener("play", function(){
     startRecognition();
 });
 
-// ⏸ Video Pause → Stop Caption
-videoPlayer.addEventListener("pause", function () {
+// ⏸ Video Pause = Stop
+videoPlayer.addEventListener("pause", function(){
     stopRecognition();
 });
 
-// 🔙 Back Button
-function goBack() {
+// 🔳 Custom Fullscreen (Container)
+function goFullScreen(){
+
+    if(videoContainer.requestFullscreen){
+        videoContainer.requestFullscreen();
+    }else if(videoContainer.webkitRequestFullscreen){
+        videoContainer.webkitRequestFullscreen();
+    }
+}
+
+// 🔙 Back
+function goBack(){
     window.location.href = "index.html";
 }
