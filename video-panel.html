@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Live Speech Reel Caption</title>
+<title>Reel Video Generator</title>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.2/dist/ffmpeg.min.js"></script>
 
 <style>
 body{
@@ -10,118 +11,86 @@ body{
   color:white;
   text-align:center;
   font-family:Arial;
-  margin:0;
 }
 
-#videoContainer{
-  position:relative;
-  display:inline-block;
-  margin-top:15px;
+input,button{
+  margin:8px;
+  padding:8px;
+  border-radius:6px;
+  border:none;
 }
 
 video{
-  width:95vw;
+  width:95%;
   max-width:400px;
-  border-radius:12px;
-}
-
-#caption{
-  position:absolute;
-  bottom:15%;
-  width:100%;
-  text-align:center;
-  font-size:34px;
-  font-weight:bold;
-  pointer-events:none;
-}
-
-.word{
-  display:inline-block;
-  margin:4px;
-  animation:pop 0.3s ease;
-}
-
-@keyframes pop{
-  0%{transform:scale(0.6);}
-  100%{transform:scale(1);}
-}
-
-button{
-  margin:8px;
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
+  margin-top:15px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🎤 Auto Speech Caption Reel</h2>
+<h2>🎬 Reel Video Generator</h2>
 
 <input type="file" id="videoInput" accept="video/*"><br>
-<button onclick="startRecognition()">Start Auto Caption</button>
+<input type="text" id="captionText" placeholder="Caption लिखें"><br>
+<button onclick="generateVideo()">Generate Video</button>
 
-<div id="videoContainer">
-  <video id="videoPlayer" controls></video>
-  <div id="caption"></div>
-</div>
+<br>
+<video id="preview" controls></video>
 
 <script>
-const videoInput = document.getElementById("videoInput");
-const videoPlayer = document.getElementById("videoPlayer");
-const captionDiv = document.getElementById("caption");
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: true });
 
-videoInput.addEventListener("change", function(){
-  const file = this.files[0];
-  if(file){
-    videoPlayer.src = URL.createObjectURL(file);
-  }
+let videoFile;
+
+document.getElementById("videoInput").addEventListener("change", (e)=>{
+  videoFile = e.target.files[0];
+  document.getElementById("preview").src = URL.createObjectURL(videoFile);
 });
 
-let recognition;
+async function generateVideo(){
 
-function startRecognition(){
-
-  if(!('webkitSpeechRecognition' in window)){
-    alert("Chrome browser में खोलें");
+  if(!videoFile){
+    alert("Video upload करें");
     return;
   }
 
-  recognition = new webkitSpeechRecognition();
-  recognition.lang = "hi-IN";
-  recognition.continuous = true;
-  recognition.interimResults = true;
+  const caption = document.getElementById("captionText").value;
+  if(!caption){
+    alert("Caption लिखें");
+    return;
+  }
 
-  recognition.onresult = function(event){
+  alert("Processing शुरू... थोड़ा समय लगेगा ⏳");
 
-    let transcript = "";
+  if(!ffmpeg.isLoaded()){
+    await ffmpeg.load();
+  }
 
-    for(let i = event.resultIndex; i < event.results.length; i++){
-      transcript += event.results[i][0].transcript;
-    }
+  ffmpeg.FS("writeFile", "input.mp4", await fetchFile(videoFile));
 
-    showWords(transcript);
-  };
+  await ffmpeg.run(
+    "-i", "input.mp4",
+    "-vf",
+    `drawtext=text='${caption}':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=h-100`,
+    "-codec:a", "copy",
+    "output.mp4"
+  );
 
-  recognition.start();
-  videoPlayer.play();
-}
+  const data = ffmpeg.FS("readFile", "output.mp4");
 
-function showWords(text){
+  const url = URL.createObjectURL(
+    new Blob([data.buffer], { type: "video/mp4" })
+  );
 
-  const words = text.split(" ");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "reel.mp4";
+  a.click();
 
-  captionDiv.innerHTML = words.map(word =>
-    `<span class="word" style="color:${randomColor()}">${word}</span>`
-  ).join(" ");
-}
-
-function randomColor(){
-  const colors=["yellow","cyan","orange","pink","lime"];
-  return colors[Math.floor(Math.random()*colors.length)];
+  alert("Video तैयार ✅");
 }
 </script>
 
