@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Reel Caption App</title>
+<title>Reel Auto Caption</title>
 
 <style>
 body {
@@ -11,10 +11,6 @@ body {
   text-align: center;
   color: white;
   font-family: Arial, sans-serif;
-}
-
-h2 {
-  margin-top: 20px;
 }
 
 #videoContainer {
@@ -38,12 +34,6 @@ video {
   font-weight: bold;
   color: yellow;
   pointer-events: none;
-}
-
-/* Fullscreen styling */
-#videoContainer:fullscreen {
-  width: 100%;
-  height: 100%;
 }
 
 #videoContainer:fullscreen video {
@@ -72,10 +62,8 @@ button {
 <h2>Upload Reel Video</h2>
 
 <input type="file" id="videoInput" accept="video/*">
-
 <br>
-
-<button onclick="playVideo()">Play</button>
+<button onclick="startEverything()">Play + Auto Caption</button>
 <button onclick="goFullScreen()">Full Screen</button>
 
 <div id="videoContainer">
@@ -88,6 +76,8 @@ const videoInput = document.getElementById("videoInput");
 const videoPlayer = document.getElementById("videoPlayer");
 const caption = document.getElementById("caption");
 
+let recognition;
+
 videoInput.addEventListener("change", function() {
   const file = this.files[0];
   if (file) {
@@ -96,39 +86,43 @@ videoInput.addEventListener("change", function() {
   }
 });
 
-function playVideo() {
+function startEverything() {
   videoPlayer.play();
+  startSpeechRecognition();
 }
 
-// Demo timed words
-const words = [
-  { text: "अगर", start: 1, end: 2 },
-  { text: "तुम", start: 2, end: 3 },
-  { text: "सीरियस", start: 3, end: 4 },
-  { text: "हो", start: 4, end: 5 }
-];
+function startSpeechRecognition() {
 
-videoPlayer.addEventListener("timeupdate", () => {
-  const currentTime = videoPlayer.currentTime;
-  let currentWord = null;
-
-  for (let i = 0; i < words.length; i++) {
-    if (currentTime >= words[i].start && currentTime < words[i].end) {
-      currentWord = words[i];
-      break;
-    }
+  if (!('webkitSpeechRecognition' in window)) {
+    alert("Speech Recognition not supported in this browser.");
+    return;
   }
 
-  if (currentWord) {
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "hi-IN";
+
+  recognition.onresult = function(event) {
+    let transcript = "";
+
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      transcript += event.results[i][0].transcript;
+    }
+
     caption.innerHTML = `
       <span style="color:${randomColor()}">
-        ${currentWord.text}
+        ${transcript}
       </span>
     `;
-  } else {
-    caption.innerHTML = "";
-  }
-});
+  };
+
+  recognition.onerror = function(event) {
+    console.log("Speech error:", event.error);
+  };
+
+  recognition.start();
+}
 
 function randomColor() {
   const colors = ["yellow", "cyan", "pink", "orange"];
@@ -140,10 +134,6 @@ function goFullScreen() {
 
   if (container.requestFullscreen) {
     container.requestFullscreen();
-  } else if (container.webkitRequestFullscreen) {
-    container.webkitRequestFullscreen();
-  } else if (container.msRequestFullscreen) {
-    container.msRequestFullscreen();
   }
 }
 </script>
