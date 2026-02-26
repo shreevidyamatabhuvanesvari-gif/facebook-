@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Reel Caption Creator</title>
+<title>Reel Word Timing Creator</title>
 
 <style>
 body{
@@ -32,7 +32,7 @@ video{
   bottom:15%;
   width:100%;
   text-align:center;
-  font-size:32px;
+  font-size:34px;
   font-weight:bold;
   pointer-events:none;
 }
@@ -56,21 +56,27 @@ button{
 }
 
 #videoContainer:fullscreen #caption{
-  font-size:55px;
+  font-size:60px;
+}
+
+.word{
+  margin:5px;
+  display:inline-block;
+  transition:all 0.2s ease;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🎬 Reel Caption Creator</h2>
+<h2>🎬 Word-by-Word Reel Caption</h2>
 
 <input type="file" id="videoInput" accept="video/*"><br>
 
-<input type="text" id="captionText" placeholder="Caption text (space separated)">
+<input type="text" id="captionText" placeholder="पूरा वाक्य लिखें">
 <input type="number" id="startTime" placeholder="Start (sec)">
-<input type="number" id="endTime" placeholder="End (sec)">
-<button onclick="addCaption()">Add Caption</button>
+<input type="number" id="wordDuration" placeholder="Per Word Time (sec)">
+<button onclick="generateWordTiming()">Generate</button>
 <br>
 <button onclick="playVideo()">Play</button>
 <button onclick="goFullScreen()">Full Screen</button>
@@ -85,7 +91,7 @@ const videoInput = document.getElementById("videoInput");
 const videoPlayer = document.getElementById("videoPlayer");
 const captionDiv = document.getElementById("caption");
 
-let captions = [];
+let wordTimings = [];
 
 videoInput.addEventListener("change", function(){
   const file = this.files[0];
@@ -94,15 +100,30 @@ videoInput.addEventListener("change", function(){
   }
 });
 
-function addCaption(){
-  const text = document.getElementById("captionText").value;
+function generateWordTiming(){
+  const text = document.getElementById("captionText").value.trim();
   const start = parseFloat(document.getElementById("startTime").value);
-  const end = parseFloat(document.getElementById("endTime").value);
+  const perWord = parseFloat(document.getElementById("wordDuration").value);
 
-  if(text && !isNaN(start) && !isNaN(end)){
-    captions.push({text, start, end});
-    alert("Caption Added ✅");
+  if(!text || isNaN(start) || isNaN(perWord)){
+    alert("सही जानकारी भरें");
+    return;
   }
+
+  wordTimings = [];
+  const words = text.split(" ");
+  let currentStart = start;
+
+  words.forEach(word=>{
+    wordTimings.push({
+      text: word,
+      start: currentStart,
+      end: currentStart + perWord
+    });
+    currentStart += perWord;
+  });
+
+  alert("Word timing generated ✅");
 }
 
 function playVideo(){
@@ -111,27 +132,33 @@ function playVideo(){
 
 videoPlayer.addEventListener("timeupdate", ()=>{
   const currentTime = videoPlayer.currentTime;
-  let activeCaption = captions.find(c => 
-    currentTime >= c.start && currentTime <= c.end
-  );
 
-  if(activeCaption){
-    displayAnimatedWords(activeCaption.text);
-  } else {
+  let activeWord = null;
+
+  for(let i=0;i<wordTimings.length;i++){
+    if(currentTime >= wordTimings[i].start &&
+       currentTime < wordTimings[i].end){
+      activeWord = wordTimings[i];
+      break;
+    }
+  }
+
+  if(activeWord){
+    displayWords(activeWord.text);
+  }else{
     captionDiv.innerHTML = "";
   }
 });
 
-function displayAnimatedWords(text){
-  const words = text.split(" ");
-  captionDiv.innerHTML = words.map(word => 
-    `<span style="
+function displayWords(word){
+  captionDiv.innerHTML = `
+    <span class="word" style="
       color:${randomColor()};
-      margin:4px;
-      display:inline-block;
-      transform:scale(${1 + Math.random()*0.3});
-    ">${word}</span>`
-  ).join(" ");
+      transform:scale(1.4);
+    ">
+      ${word}
+    </span>
+  `;
 }
 
 function randomColor(){
