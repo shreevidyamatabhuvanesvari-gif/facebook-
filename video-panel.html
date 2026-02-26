@@ -1,88 +1,27 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Caption Panel</title>
-
-<style>
-body{
-    margin:0;
-    background:black;
-    color:white;
-    font-family:Arial, sans-serif;
-    text-align:center;
-}
-
-h2{
-    padding:10px 0;
-}
-
-input, button{
-    width:90%;
-    max-width:400px;
-    padding:10px;
-    margin-top:10px;
-    font-size:16px;
-    border-radius:8px;
-    border:none;
-}
-
-button{
-    background:#ff0055;
-    color:white;
-    font-weight:bold;
-}
-
-/* Video Wrapper */
-#videoContainer{
-    position:relative;
-    width:100%;
-    margin-top:15px;
-    background:black;
-}
-
-#videoPlayer{
-    width:100%;
-    background:black;
-}
-
-/* Caption Overlay */
-#liveCaption{
-    position:absolute;
-    bottom:30px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
-    text-shadow:2px 2px 8px black;
-    pointer-events:none;
-}
-
-/* Fullscreen Fix */
-#videoContainer:fullscreen #liveCaption,
-#videoContainer:-webkit-full-screen #liveCaption{
-    font-size:34px;
-}
-</style>
+  <title>Reel Caption App</title>
+  <style>
+    body { background: black; color: white; text-align: center; }
+    #videoContainer { position: relative; display: inline-block; }
+    #caption {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      font-size: 28px;
+      font-weight: bold;
+    }
+  </style>
 </head>
-
 <body>
 
-<h2>Video Live Caption</h2>
-
+<h2>Upload Reel</h2>
 <input type="file" id="videoInput" accept="video/*">
 
-<button onclick="startRecognition()">कैप्शन शुरू करें</button>
-<button onclick="stopRecognition()">कैप्शन रोकें</button>
-<button onclick="goFullScreen()">फुल स्क्रीन</button>
-<button onclick="goBack()">वापस जाएँ</button>
-
 <div id="videoContainer">
-    <video id="videoPlayer" controls controlsList="nofullscreen"></video>
-    <div id="liveCaption"></div>
+  <video id="videoPlayer" width="400" controls></video>
+  <div id="caption"></div>
 </div>
 
 <script src="video.js"></script>
