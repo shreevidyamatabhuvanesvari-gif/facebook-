@@ -8,25 +8,33 @@ videoInput.addEventListener("change", function() {
   videoPlayer.src = url;
 });
 
-// Demo words (later replace with real speech-to-text)
+// Demo words with duration
 const words = [
-  { text: "अगर", time: 1 },
-  { text: "तुम", time: 2 },
-  { text: "सीरियस", time: 3 },
-  { text: "हो", time: 4 }
+  { text: "अगर", start: 1, end: 2 },
+  { text: "तुम", start: 2, end: 3 },
+  { text: "सीरियस", start: 3, end: 4 },
+  { text: "हो", start: 4, end: 5 }
 ];
 
 videoPlayer.addEventListener("timeupdate", () => {
-  const currentTime = Math.floor(videoPlayer.currentTime);
+  const currentTime = videoPlayer.currentTime;
 
-  const word = words.find(w => w.time === currentTime);
+  const word = words.find(w =>
+    currentTime >= w.start && currentTime < w.end
+  );
+
   if (word) {
     caption.innerHTML = `
-      <span style="color:${randomColor()}; 
-                   font-size:32px;
-                   animation: pop 0.3s;">
+      <span style="
+        color:${randomColor()};
+        font-size:32px;
+        font-weight:bold;
+      ">
         ${word.text}
-      </span>`;
+      </span>
+    `;
+  } else {
+    caption.innerHTML = "";
   }
 });
 
