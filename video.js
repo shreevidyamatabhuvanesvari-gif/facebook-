@@ -8,7 +8,6 @@ videoInput.addEventListener("change", function() {
   videoPlayer.src = url;
 });
 
-// Demo words with duration
 const words = [
   { text: "अगर", start: 1, end: 2 },
   { text: "तुम", start: 2, end: 3 },
@@ -19,26 +18,18 @@ const words = [
 videoPlayer.addEventListener("timeupdate", () => {
   const currentTime = videoPlayer.currentTime;
 
-  const word = words.find(w =>
-    currentTime >= w.start && currentTime < w.end
-  );
+  let currentWord = null;
 
-  if (word) {
-    caption.innerHTML = `
-      <span style="
-        color:${randomColor()};
-        font-size:32px;
-        font-weight:bold;
-      ">
-        ${word.text}
-      </span>
-    `;
+  for (let i = 0; i < words.length; i++) {
+    if (currentTime >= words[i].start && currentTime < words[i].end) {
+      currentWord = words[i];
+      break;
+    }
+  }
+
+  if (currentWord) {
+    caption.innerHTML = currentWord.text;
   } else {
     caption.innerHTML = "";
   }
 });
-
-function randomColor() {
-  const colors = ["yellow", "cyan", "pink", "orange"];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
