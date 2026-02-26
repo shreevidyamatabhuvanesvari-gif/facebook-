@@ -2,18 +2,16 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Auto Word Timing Reel Creator</title>
+<title>Live Speech Reel Caption</title>
 
 <style>
 body{
   background:black;
   color:white;
   text-align:center;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   margin:0;
 }
-
-h2{margin-top:15px;}
 
 #videoContainer{
   position:relative;
@@ -37,49 +35,34 @@ video{
   pointer-events:none;
 }
 
-input, button{
-  margin:5px;
-  padding:8px;
-  border-radius:6px;
-  border:none;
+.word{
+  display:inline-block;
+  margin:4px;
+  animation:pop 0.3s ease;
+}
+
+@keyframes pop{
+  0%{transform:scale(0.6);}
+  100%{transform:scale(1);}
 }
 
 button{
-  cursor:pointer;
+  margin:8px;
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
   font-weight:bold;
-}
-
-#videoContainer:fullscreen video{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-
-#videoContainer:fullscreen #caption{
-  font-size:60px;
-}
-
-.word{
-  margin:5px;
-  display:inline-block;
-  transition:all 0.2s ease;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🎬 Auto Word Timing Reel</h2>
+<h2>🎤 Auto Speech Caption Reel</h2>
 
 <input type="file" id="videoInput" accept="video/*"><br>
-
-<input type="text" id="captionText" placeholder="पूरा वाक्य लिखें">
-<input type="number" id="startTime" placeholder="Start (sec)">
-<input type="number" id="endTime" placeholder="End (sec)">
-<button onclick="generateAutoTiming()">Generate Auto Timing</button>
-<br>
-<button onclick="playVideo()">Play</button>
-<button onclick="goFullScreen()">Full Screen</button>
+<button onclick="startRecognition()">Start Auto Caption</button>
 
 <div id="videoContainer">
   <video id="videoPlayer" controls></video>
@@ -91,8 +74,6 @@ const videoInput = document.getElementById("videoInput");
 const videoPlayer = document.getElementById("videoPlayer");
 const captionDiv = document.getElementById("caption");
 
-let wordTimings = [];
-
 videoInput.addEventListener("change", function(){
   const file = this.files[0];
   if(file){
@@ -100,76 +81,47 @@ videoInput.addEventListener("change", function(){
   }
 });
 
-function generateAutoTiming(){
-  const text = document.getElementById("captionText").value.trim();
-  const start = parseFloat(document.getElementById("startTime").value);
-  const end = parseFloat(document.getElementById("endTime").value);
+let recognition;
 
-  if(!text || isNaN(start) || isNaN(end) || end <= start){
-    alert("सही जानकारी भरें");
+function startRecognition(){
+
+  if(!('webkitSpeechRecognition' in window)){
+    alert("Chrome browser में खोलें");
     return;
   }
 
-  wordTimings = [];
-  const words = text.split(" ");
-  const totalDuration = end - start;
-  const perWord = totalDuration / words.length;
+  recognition = new webkitSpeechRecognition();
+  recognition.lang = "hi-IN";
+  recognition.continuous = true;
+  recognition.interimResults = true;
 
-  let currentStart = start;
+  recognition.onresult = function(event){
 
-  words.forEach(word=>{
-    wordTimings.push({
-      text: word,
-      start: currentStart,
-      end: currentStart + perWord
-    });
-    currentStart += perWord;
-  });
+    let transcript = "";
 
-  alert("Auto timing generated ✅");
-}
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      transcript += event.results[i][0].transcript;
+    }
 
-function playVideo(){
+    showWords(transcript);
+  };
+
+  recognition.start();
   videoPlayer.play();
 }
 
-videoPlayer.addEventListener("timeupdate", ()=>{
-  const currentTime = videoPlayer.currentTime;
+function showWords(text){
 
-  let activeWord = null;
+  const words = text.split(" ");
 
-  for(let i=0;i<wordTimings.length;i++){
-    if(currentTime >= wordTimings[i].start &&
-       currentTime < wordTimings[i].end){
-      activeWord = wordTimings[i];
-      break;
-    }
-  }
-
-  if(activeWord){
-    captionDiv.innerHTML = `
-      <span class="word" style="
-        color:${randomColor()};
-        transform:scale(1.4);
-      ">
-        ${activeWord.text}
-      </span>
-    `;
-  }else{
-    captionDiv.innerHTML = "";
-  }
-});
+  captionDiv.innerHTML = words.map(word =>
+    `<span class="word" style="color:${randomColor()}">${word}</span>`
+  ).join(" ");
+}
 
 function randomColor(){
   const colors=["yellow","cyan","orange","pink","lime"];
   return colors[Math.floor(Math.random()*colors.length)];
-}
-
-function goFullScreen(){
-  const container=document.getElementById("videoContainer");
-  if(container.requestFullscreen){
-    container.requestFullscreen();
-  }
 }
 </script>
 
