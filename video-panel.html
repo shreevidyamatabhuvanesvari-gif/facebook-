@@ -2,8 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Reel Video Generator</title>
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.2/dist/ffmpeg.min.js"></script>
+<title>Reel Generator</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 
 <style>
 body{
@@ -14,7 +15,7 @@ body{
 }
 
 input,button{
-  margin:8px;
+  margin:10px;
   padding:8px;
   border-radius:6px;
   border:none;
@@ -34,14 +35,18 @@ video{
 
 <input type="file" id="videoInput" accept="video/*"><br>
 <input type="text" id="captionText" placeholder="Caption लिखें"><br>
-<button onclick="generateVideo()">Generate Video</button>
+<button id="generateBtn">Generate Video</button>
 
 <br>
 <video id="preview" controls></video>
 
 <script>
 const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log: true });
+
+const ffmpeg = createFFmpeg({
+  log: true,
+  corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"
+});
 
 let videoFile;
 
@@ -50,10 +55,10 @@ document.getElementById("videoInput").addEventListener("change", (e)=>{
   document.getElementById("preview").src = URL.createObjectURL(videoFile);
 });
 
-async function generateVideo(){
+document.getElementById("generateBtn").addEventListener("click", async ()=>{
 
   if(!videoFile){
-    alert("Video upload करें");
+    alert("पहले video upload करें");
     return;
   }
 
@@ -63,35 +68,43 @@ async function generateVideo(){
     return;
   }
 
-  alert("Processing शुरू... थोड़ा समय लगेगा ⏳");
+  try{
 
-  if(!ffmpeg.isLoaded()){
-    await ffmpeg.load();
+    alert("FFmpeg load हो रहा है ⏳ (पहली बार समय लगेगा)");
+
+    if(!ffmpeg.isLoaded()){
+      await ffmpeg.load();
+    }
+
+    ffmpeg.FS("writeFile", "input.mp4", await fetchFile(videoFile));
+
+    await ffmpeg.run(
+      "-i", "input.mp4",
+      "-vf",
+      `drawtext=text='${caption}':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=h-80`,
+      "-codec:a", "copy",
+      "output.mp4"
+    );
+
+    const data = ffmpeg.FS("readFile", "output.mp4");
+
+    const url = URL.createObjectURL(
+      new Blob([data.buffer], { type: "video/mp4" })
+    );
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reel.mp4";
+    a.click();
+
+    alert("Video तैयार ✅");
+
+  }catch(err){
+    console.error(err);
+    alert("Error आया — console check करें");
   }
 
-  ffmpeg.FS("writeFile", "input.mp4", await fetchFile(videoFile));
-
-  await ffmpeg.run(
-    "-i", "input.mp4",
-    "-vf",
-    `drawtext=text='${caption}':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=h-100`,
-    "-codec:a", "copy",
-    "output.mp4"
-  );
-
-  const data = ffmpeg.FS("readFile", "output.mp4");
-
-  const url = URL.createObjectURL(
-    new Blob([data.buffer], { type: "video/mp4" })
-  );
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "reel.mp4";
-  a.click();
-
-  alert("Video तैयार ✅");
-}
+});
 </script>
 
 </body>
