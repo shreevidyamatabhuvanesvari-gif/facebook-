@@ -1,103 +1,36 @@
-let recognition = null;
-let isRunning = false;
-
 const videoInput = document.getElementById("videoInput");
 const videoPlayer = document.getElementById("videoPlayer");
-const liveCaption = document.getElementById("liveCaption");
-const videoContainer = document.getElementById("videoContainer");
+const caption = document.getElementById("caption");
 
-// 🎬 Upload Video
-videoInput.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
-        videoPlayer.src = URL.createObjectURL(file);
-        videoPlayer.load();
-        liveCaption.innerHTML = "";
-    }
+videoInput.addEventListener("change", function() {
+  const file = this.files[0];
+  const url = URL.createObjectURL(file);
+  videoPlayer.src = url;
 });
 
-// 🎨 Random Color Generator
+// Demo words (later replace with real speech-to-text)
+const words = [
+  { text: "अगर", time: 1 },
+  { text: "तुम", time: 2 },
+  { text: "सीरियस", time: 3 },
+  { text: "हो", time: 4 }
+];
+
+videoPlayer.addEventListener("timeupdate", () => {
+  const currentTime = Math.floor(videoPlayer.currentTime);
+
+  const word = words.find(w => w.time === currentTime);
+  if (word) {
+    caption.innerHTML = `
+      <span style="color:${randomColor()}; 
+                   font-size:32px;
+                   animation: pop 0.3s;">
+        ${word.text}
+      </span>`;
+  }
+});
+
 function randomColor() {
-    return `hsl(${Math.floor(Math.random() * 360)}, 100%, 60%)`;
-}
-
-// 🎨 Multi Color Caption
-function multiColor(text) {
-    return text
-        .trim()
-        .split(" ")
-        .map(word => `<span style="color:${randomColor()}">${word}</span>`)
-        .join(" ");
-}
-
-// 🎤 Start Recognition
-function startRecognition() {
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-        alert("आपका ब्राउज़र Speech Recognition सपोर्ट नहीं करता। कृपया Chrome का उपयोग करें।");
-        return;
-    }
-
-    if (isRunning) return;
-
-    recognition = new SpeechRecognition();
-
-    recognition.lang = "hi-IN";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = function (event) {
-
-        let finalTranscript = "";
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript + " ";
-            }
-        }
-
-        if (finalTranscript.trim() !== "") {
-            liveCaption.innerHTML = multiColor(finalTranscript);
-        }
-    };
-
-    recognition.onerror = function (event) {
-        console.error("Speech Recognition Error:", event.error);
-    };
-
-    recognition.onend = function () {
-        if (isRunning) {
-            recognition.start(); // auto restart
-        }
-    };
-
-    recognition.start();
-    isRunning = true;
-
-    // 🎬 वीडियो भी साथ में चलाएं
-    videoPlayer.play();
-}
-
-// 🛑 Stop Recognition
-function stopRecognition() {
-    if (recognition) {
-        isRunning = false;
-        recognition.stop();
-    }
-}
-
-// 🔳 Fullscreen
-function goFullScreen() {
-    if (videoContainer.requestFullscreen) {
-        videoContainer.requestFullscreen();
-    } else if (videoContainer.webkitRequestFullscreen) {
-        videoContainer.webkitRequestFullscreen();
-    }
-}
-
-// 🔙 Back
-function goBack() {
-    window.location.href = "index.html";
+  const colors = ["yellow", "cyan", "pink", "orange"];
+  return colors[Math.floor(Math.random() * colors.length)];
 }
