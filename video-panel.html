@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Reel Word Timing Creator</title>
+<title>Auto Word Timing Reel Creator</title>
 
 <style>
 body{
@@ -69,14 +69,14 @@ button{
 
 <body>
 
-<h2>🎬 Word-by-Word Reel Caption</h2>
+<h2>🎬 Auto Word Timing Reel</h2>
 
 <input type="file" id="videoInput" accept="video/*"><br>
 
 <input type="text" id="captionText" placeholder="पूरा वाक्य लिखें">
 <input type="number" id="startTime" placeholder="Start (sec)">
-<input type="number" id="wordDuration" placeholder="Per Word Time (sec)">
-<button onclick="generateWordTiming()">Generate</button>
+<input type="number" id="endTime" placeholder="End (sec)">
+<button onclick="generateAutoTiming()">Generate Auto Timing</button>
 <br>
 <button onclick="playVideo()">Play</button>
 <button onclick="goFullScreen()">Full Screen</button>
@@ -100,18 +100,21 @@ videoInput.addEventListener("change", function(){
   }
 });
 
-function generateWordTiming(){
+function generateAutoTiming(){
   const text = document.getElementById("captionText").value.trim();
   const start = parseFloat(document.getElementById("startTime").value);
-  const perWord = parseFloat(document.getElementById("wordDuration").value);
+  const end = parseFloat(document.getElementById("endTime").value);
 
-  if(!text || isNaN(start) || isNaN(perWord)){
+  if(!text || isNaN(start) || isNaN(end) || end <= start){
     alert("सही जानकारी भरें");
     return;
   }
 
   wordTimings = [];
   const words = text.split(" ");
+  const totalDuration = end - start;
+  const perWord = totalDuration / words.length;
+
   let currentStart = start;
 
   words.forEach(word=>{
@@ -123,7 +126,7 @@ function generateWordTiming(){
     currentStart += perWord;
   });
 
-  alert("Word timing generated ✅");
+  alert("Auto timing generated ✅");
 }
 
 function playVideo(){
@@ -144,22 +147,18 @@ videoPlayer.addEventListener("timeupdate", ()=>{
   }
 
   if(activeWord){
-    displayWords(activeWord.text);
+    captionDiv.innerHTML = `
+      <span class="word" style="
+        color:${randomColor()};
+        transform:scale(1.4);
+      ">
+        ${activeWord.text}
+      </span>
+    `;
   }else{
     captionDiv.innerHTML = "";
   }
 });
-
-function displayWords(word){
-  captionDiv.innerHTML = `
-    <span class="word" style="
-      color:${randomColor()};
-      transform:scale(1.4);
-    ">
-      ${word}
-    </span>
-  `;
-}
 
 function randomColor(){
   const colors=["yellow","cyan","orange","pink","lime"];
