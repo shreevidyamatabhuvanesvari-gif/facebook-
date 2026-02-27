@@ -1,85 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Viral Reel Generator</title>
-<style>
-body {
-  margin: 0;
-  background: black;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-
-video {
-  width: 100%;
-  max-height: 80vh;
-}
-
-#caption {
-  position: absolute;
-  bottom: 15%;
-  width: 100%;
-  font-size: 28px;
-  font-weight: bold;
-  text-shadow: 2px 2px 10px black;
-}
-button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Reel Caption App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h2>Real Viral Reel Generator</h2>
+    <h1>🎬 Reel Caption Generator</h1>
 
-<input type="file" id="videoUpload" accept="video/*">
-<br>
-<button onclick="startRecognition()">Generate Video Caption</button>
+    <input type="file" id="videoUpload" accept="video/*">
+    <br><br>
 
-<div style="position:relative;">
-  <video id="video" controls></video>
-  <div id="caption"></div>
-</div>
+    <video id="videoPreview" controls></video>
 
-<script>
-let recognition;
-let captionDiv = document.getElementById("caption");
-let video = document.getElementById("video");
+    <div id="captionBox"></div>
 
-document.getElementById("videoUpload").onchange = function(event) {
-  const file = event.target.files[0];
-  video.src = URL.createObjectURL(file);
-};
+    <br>
+    <button onclick="startSpeechRecognition()">Generate Captions</button>
 
-function startRecognition() {
-
-  if (!('webkitSpeechRecognition' in window)) {
-    alert("Use Google Chrome browser");
-    return;
-  }
-
-  recognition = new webkitSpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = "hi-IN";
-
-  recognition.onresult = function(event) {
-    let transcript = "";
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      transcript += event.results[i][0].transcript;
-    }
-    captionDiv.innerText = transcript;
-  };
-
-  recognition.start();
-  video.play();
-}
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
