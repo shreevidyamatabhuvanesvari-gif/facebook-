@@ -102,10 +102,9 @@ function speak(text) {
         if (currentIndex < slides.length) {
             showSlide(currentIndex);
         } else {
-            // 🔴 रील पूरी समाप्त — Replay दिखाएँ
-            if (typeof reelFinished === "function") {
-                reelFinished();
-            }
+            // 🔴 रील पूरी समाप्त — कंट्रोल पैनल वापस
+            reelView.style.display = "none";
+            controls.style.display = "block";
         }
     };
 
