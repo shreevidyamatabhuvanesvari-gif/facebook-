@@ -86,7 +86,7 @@ function speak(text) {
 
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "hi-IN";
-    speech.pitch = 1.1;
+    speech.pitch = 1.2;
     speech.rate = 1;
 
     const voices = window.speechSynthesis.getVoices();
