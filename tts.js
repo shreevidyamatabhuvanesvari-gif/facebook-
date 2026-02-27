@@ -101,6 +101,11 @@ function speak(text) {
         currentIndex++;
         if (currentIndex < slides.length) {
             showSlide(currentIndex);
+        } else {
+            // 🔴 रील पूरी समाप्त — Replay दिखाएँ
+            if (typeof reelFinished === "function") {
+                reelFinished();
+            }
         }
     };
 
