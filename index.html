@@ -39,6 +39,11 @@ button {
     font-weight: bold;
 }
 
+/* Replay hidden initially */
+#replayBtn {
+    display: none;
+}
+
 /* Reel View */
 #reelView {
     display: none;
@@ -83,8 +88,8 @@ button {
     <button onclick="addSlide()">फोटो जोड़ें</button>
     <button onclick="startReel()">बोलो</button>
 
-    <!-- 🔴 नया Replay बटन -->
-    <button onclick="replayReel()">पुनः प्ले</button>
+    <!-- Replay Button -->
+    <button id="replayBtn" onclick="replayReel()">पुनः प्ले</button>
 
     <button onclick="window.location.href='video-panel.html'">
 वीडियो क्लिप पैनल
@@ -102,11 +107,20 @@ button {
 <script src="tts.js"></script>
 
 <script>
+
+// जब रील खत्म हो जाए तो यह function कॉल करें
+function reelFinished() {
+    document.getElementById("replayBtn").style.display = "block";
+}
+
+// Replay
 function replayReel() {
+    document.getElementById("replayBtn").style.display = "none";
     if (typeof startReel === "function") {
         startReel();
     }
 }
+
 </script>
 
 </body>
